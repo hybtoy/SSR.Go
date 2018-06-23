@@ -422,6 +422,7 @@ install(){
     mv shadowsocksr-manyuser/shadowsocks /usr/local/
     if [ -f /usr/local/shadowsocks/server.py ]; then
         chmod +x /etc/init.d/shadowsocks
+        chmod +x /usr/local/shadowsocks/server.py
         if check_sys packageManager yum; then
             chkconfig --add shadowsocks
             chkconfig shadowsocks on
