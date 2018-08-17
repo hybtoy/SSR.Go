@@ -1,0 +1,53 @@
+#!/bin/bash
+export PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+
+#检查是否为Root
+[ $(id -u) != "0" ] && { echo "Error: You must be root to run this script"; exit 1; }
+
+#检查系统信息
+if [ -f /etc/redhat-release ];then
+        OS='CentOS'
+    elif [ ! -z "`cat /etc/issue | grep bian`" ];then
+        OS='Debian'
+    elif [ ! -z "`cat /etc/issue | grep Ubuntu`" ];then
+        OS='Ubuntu'
+    else
+        echo "Not support OS, Please reinstall OS and retry!"
+        exit 1
+fi
+
+#禁用SELinux
+if [ -s /etc/selinux/config ] && grep 'SELINUX=enforcing' /etc/selinux/config; then
+    sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
+    setenforce 0
+fi
+
+#安装依赖
+if [[ ${OS} == 'CentOS' ]];then
+    curl sudo bash -
+	yum install curl wget unzip git ntp ntpdate lrzsz python -y
+else
+    curl sudo -E bash -
+	apt-get update
+	apt-get install curl unzip git ntp wget ntpdate python socat lrzsz -y
+fi
+
+#克隆ssr.go项目
+cd /usr/local/
+rm -R SSR.Go
+git clone https://github.com/leitbogioro/SSR.Go
+
+#安装shadowsocksRR主程序
+bash <(curl -L -s https://git.io/fNpEa)
+
+#配置ssr初始环境
+ln -sf /usr/local/SSR.Go/ssr /usr/local/bin
+chmod +x /usr/local/bin/ssr
+chmod +x /etc/init.d/shadowsocks
+chmod +x /usr/local/shadowsocks/
+/etc/init.d/shadowsocks start
+
+clear
+
+echo "SSR 安装成功！"
+echo "输入 srr 并回车即可使用"
